@@ -45,9 +45,9 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/sales_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/new_sales_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_margin="30dp"
             android:orientation="vertical">
 
@@ -62,7 +62,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Sales"
+                android:text="New Sale"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sales_history_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView1d"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/textView1d"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Sales History"
                 android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
