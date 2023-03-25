@@ -38,7 +38,7 @@ public class Query {
 
     /* order queries */
     public static final String ORDER_CREATE_ORDER_TABLE = "CREATE TABLE IF NOT EXISTS orders" +
-            " (id TEXT PRIMARY KEY, customerId TEXT, orderDate TEXT);";
+            " (id TEXT PRIMARY KEY, customerId TEXT, order_date TEXT);";
     public static final String ORDER_CREATE_ORDER_LINES_TABLE = "CREATE TABLE IF NOT EXISTS order_lines" +
             " (orderId TEXT, id TEXT, name TEXT, quantity TEXT, price TEXT);";
     public static final String ORDER_CREATE_ORDER_PAYMENT_DETAILS_TABLE = "CREATE TABLE IF NOT EXISTS order_payment_details" +
@@ -49,5 +49,5 @@ public class Query {
     public static final String ORDER_LINES_BY_ORDER_ID = "SELECT * FROM order_lines WHERE orderId='PARAM01'";
     public static final String ORDER_FIND_PAYMENT_DETAILS_BY_ORDER_ID = "SELECT * FROM order_payment_details WHERE orderId='PARAM01'";
     public static final String ORDER_FIND_PAYMENTS_BY_ORDER_ID = "SELECT * FROM payments WHERE orderId='PARAM01'";
-
+    public static final String ORDER_FIND_ALL = "SELECT * FROM orders ORDER BY order_date desc";
 }

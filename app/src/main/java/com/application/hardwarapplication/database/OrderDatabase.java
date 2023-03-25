@@ -82,8 +82,28 @@ public class OrderDatabase extends DatabaseHelper {
         ContentValues values = new ContentValues();
         values.put("id", orderId);
         values.put("customerId", customerId);
-        values.put("orderDate", orderDate);
+        values.put("order_date", orderDate);
         long orders = writableDatabase.insert("orders", null, values);
         return orders != -1;
+    }
+
+    public List<Order> findAll() {
+        Cursor cursor = readableDatabase.rawQuery(Query.ORDER_FIND_ALL, null);
+        List<Order> orderList=new ArrayList<>();
+        for (String orderId : getListOfOrderIds(cursor)) {
+            orderList.add(findById(orderId));
+        }
+        cursor.close();
+        return orderList;
+    }
+
+    private List<String> getListOfOrderIds(Cursor cursor) {
+        List<String> orderIds=new ArrayList<>();
+        if (cursor.moveToFirst()){
+            do {
+                orderIds.add(cursor.getString(0));
+            }while (cursor.moveToNext());
+        }
+        return orderIds;
     }
 }

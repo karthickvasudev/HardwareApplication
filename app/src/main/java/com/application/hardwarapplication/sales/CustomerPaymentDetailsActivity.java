@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -40,6 +41,7 @@ public class CustomerPaymentDetailsActivity extends AppCompatActivity {
     private TextView totalHeader;
     private RadioGroup payingRadioGroup;
     private RadioButton payingNowRadio;
+    private RadioButton payingLaterRadio;
     private LinearLayout paymentDetailsLayout;
     private Button completeOrderBtn;
     private EditText balance;
@@ -54,13 +56,19 @@ public class CustomerPaymentDetailsActivity extends AppCompatActivity {
     private RadioButton paymentTypeCash;
     private RadioButton paymentTypeUPI;
     private OrderDatabase orderDatabase;
+    private Boolean addPayment = false;
+    private Order order;
+    private LinearLayout alreadyPaidLayout;
+    private TextView alreadyPaid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_payment_details);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         customerDatabase = new CustomerDatabase(this);
         orderDatabase = new OrderDatabase(this);
+        addPayment = getIntent().getBooleanExtra("addPayment", false);
         initElements();
         initialValueSet();
         initMethods();
@@ -70,6 +78,7 @@ public class CustomerPaymentDetailsActivity extends AppCompatActivity {
         totalHeader = findViewById(R.id.payment_totalBillHeader);
         payingRadioGroup = findViewById(R.id.payment_paying_radio_group);
         payingNowRadio = findViewById(R.id.payment_paying_now_radio);
+        payingLaterRadio = findViewById(R.id.payment_paying_later_raido);
         paymentDetailsLayout = findViewById(R.id.payment_details_layout);
         completeOrderBtn = findViewById(R.id.payment_complete_order_btn);
         balance = findViewById(R.id.payment_balance);
@@ -82,28 +91,46 @@ public class CustomerPaymentDetailsActivity extends AppCompatActivity {
         paymentTypeRadioGroup = findViewById(R.id.payment_type);
         paymentTypeCash = findViewById(R.id.payment_type_cash);
         paymentTypeUPI = findViewById(R.id.payment_type_upi);
+        alreadyPaidLayout = findViewById(R.id.payment_already_paid_layout);
+        alreadyPaid = findViewById(R.id.payment_already_paid);
     }
 
     private void initialValueSet() {
-        orderLines = (ArrayList<OrderLines>) ((ArrayList<Product>) getIntent().getSerializableExtra("orderDetails"))
-                .stream().map(product ->
-                    OrderLines.builder()
-                            .id(product.getId())
-                            .name(product.getName())
-                            .quantity(product.getQuantity())
-                            .price(product.getPrice())
-                            .build()
-                ).collect(Collectors.toList());
-        Double totalBill = orderLines.stream().map(OrderLines::getPrice).mapToDouble(Double::doubleValue).sum();
-        totalHeader.setText("₹ " + totalBill);
-        orderPaymentDetails.setTotalBillAmount(totalBill);
-        orderPaymentDetails.setBalance(totalBill);
-        orderPaymentDetails.setAdvance(0.0);
-        orderPaymentDetails.setPaidAmount(0.0);
-        orderPaymentDetails.setDiscount(0.0);
-        orderPaymentDetails.setStatus(PAYMENT_STATUS.NOT_PAID);
+        if (addPayment) {
+            order = orderDatabase.findById(getIntent().getStringExtra("orderId"));
+            orderLines = (ArrayList<OrderLines>) order.getOrderLines();
+            orderPaymentDetails = order.getPaymentDetails();
+            balance.setText(String.valueOf(orderPaymentDetails.getBalance()));
+            name.setText(order.getCustomer().getName());
+            name.setEnabled(false);
+            phoneNumber.setText(order.getCustomer().getPhoneNumber());
+            phoneNumber.setEnabled(false);
+            totalHeader.setText("₹ " + orderPaymentDetails.getTotalBillAmount());
+            payingNowRadio.setChecked(true);
+            payingLaterRadio.setEnabled(false);
+            alreadyPaidLayout.setVisibility(View.VISIBLE);
+            alreadyPaid.setText(String.valueOf(order.getPaymentDetails().getPaidAmount()));
+        } else {
+            orderLines = (ArrayList<OrderLines>) ((ArrayList<Product>) getIntent().getSerializableExtra("orderDetails"))
+                    .stream().map(product ->
+                            OrderLines.builder()
+                                    .id(product.getId())
+                                    .name(product.getName())
+                                    .quantity(product.getQuantity())
+                                    .price(product.getPrice())
+                                    .build()
+                    ).collect(Collectors.toList());
+            Double totalBill = orderLines.stream().map(OrderLines::getPrice).mapToDouble(Double::doubleValue).sum();
+            totalHeader.setText("₹ " + totalBill);
+            orderPaymentDetails.setTotalBillAmount(totalBill);
+            orderPaymentDetails.setBalance(totalBill);
+            orderPaymentDetails.setAdvance(0.0);
+            orderPaymentDetails.setPaidAmount(0.0);
+            orderPaymentDetails.setDiscount(0.0);
+            orderPaymentDetails.setStatus(PAYMENT_STATUS.NOT_PAID);
 
-        balance.setText(String.valueOf(orderPaymentDetails.getBalance()));
+            balance.setText(String.valueOf(orderPaymentDetails.getBalance()));
+        }
     }
 
 
@@ -343,13 +370,24 @@ public class CustomerPaymentDetailsActivity extends AppCompatActivity {
     private Customer buildCustomerData() {
         Optional<Customer> optionalCustomer =
                 customerDatabase.customerFindByPhoneNumber(phoneNumber.getText().toString());
-        if(optionalCustomer.isPresent()){
+        if (optionalCustomer.isPresent()) {
             System.out.println("using existing customer");
             return optionalCustomer.get();
-        }else {
+        } else {
             System.out.println("creating customer");
             return customerDatabase.createCustomer(name.getText().toString(),
                     phoneNumber.getText().toString(), "").get();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

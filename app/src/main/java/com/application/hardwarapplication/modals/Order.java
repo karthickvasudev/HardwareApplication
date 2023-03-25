@@ -2,6 +2,7 @@ package com.application.hardwarapplication.modals;
 
 import com.application.hardwarapplication.utils.PAYMENT_STATUS;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import lombok.ToString;
 @Data
 @Builder
 @ToString
-public class Order {
+public class Order implements Serializable {
     private String orderId;
     private String customerId;
     private Customer customer;
